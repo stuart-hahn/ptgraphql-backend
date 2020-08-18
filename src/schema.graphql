@@ -1,0 +1,17 @@
+type Query {
+  info: String!
+  feed: [Tournament!]!
+  tournament(id: ID): Tournament!
+}
+
+type Mutation {
+  createTournament(name: String!, url: String!): Tournament!
+  updateTournament(id: ID!, name: String, url: String): Tournament!
+  deleteTournament(id: ID!): Tournament!
+}
+
+type Tournament {
+  id: ID!
+  name: String!
+  url: String!
+}

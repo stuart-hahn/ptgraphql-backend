@@ -13,33 +13,58 @@ let tournaments = [
   },
 ]
 
-const typeDefs = `
-type Query {
-  info: String!
-  feed: [Tournament!]!
-}
-
-type Tournament {
-  id: ID!
-  name: String!
-  url: String!
-}
-`
+let idCount = tournaments.length
 
 const resolvers = {
   Query: {
     info: () => 'This is the API of a player tracker',
-    feed: () => tournaments
+    feed: () => tournaments,
+    tournament: (parent, args) => {
+      const tournament = tournaments.find(t => t.id === args.id)
+      return tournament
+    }
   },
-  Tournament: {
-    id: (parent) => parent.id,
-    name: (parent) => parent.name,
-    url: (parent) => parent.url
+  Mutation: {
+    createTournament: (parent, args) => {
+      const tournament = {
+        id: `fnf-${idCount++}`,
+        name: args.name,
+        url: args.url
+      }
+      tournaments.push(tournament)
+      return tournament
+    },
+    updateTournament: (parent, args) => {
+      const tournament = tournaments.find(t => t.id === args.id)
+      if (!tournament) {
+        throw new Error("Tournament not found")
+      }
+      if (args.name) {
+        tournament.name = args.name
+      }
+      if (args.url) {
+        tournament.url = args.url
+      }
+      return tournament
+    },
+    deleteTournament: (parent, args) => {
+      const tournament = tournaments.find(t => t.id === args.id)
+      if (!tournament) {
+        throw new Error('Could not delete tournament')
+      }
+      tournaments = tournaments.filter(t => t.id !== tournament.id)
+      return tournament
+    }
   }
+  // Tournament: {
+  //   id: (parent) => parent.id,
+  //   name: (parent) => parent.name,
+  //   url: (parent) => parent.url
+  // }
 }
 
 const server = new GraphQLServer({
-  typeDefs,
+  typeDefs: './src/schema.graphql',
   resolvers
 })
 server.start(() => console.log('Server is up on http://localhost:4000'))
